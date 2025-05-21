@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: my-social-network
+  mvc:
+    problemdetails:
+      enabled: true
+  flyway:
+    baseline-on-migrate: true
+
+spicedb:
+  host: localhost
+  grpc-port: 50051

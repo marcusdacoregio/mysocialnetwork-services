@@ -1,0 +1,59 @@
+definition user {
+    // Represents an authenticated system user, corresponding to your `users` table.
+    // This is the entity that typically logs in.
+}
+
+definition profile {
+    // Corresponds to your `profiles` table.
+    // A social identity that can be owned by a `user`.
+
+    relation owner: user           // The user who owns/manages this profile.
+                                   // (e.g., profile:profile_alice#owner@user:user_123)
+
+    relation follower: profile     // Profiles that are following *this* profile.
+                                   // From `profile_follows` where this profile is `followee_profile_id`.
+                                   // (e.g., profile:profile_bob#follower@profile:profile_alice means Alice follows Bob)
+
+    relation following: profile    // Profiles that *this* profile is following.
+                                   // From `profile_follows` where this profile is `follower_profile_id`.
+                                   // (e.g., profile:profile_alice#following@profile:profile_bob means Alice follows Bob)
+
+    permission edit = owner        // Only the owner of the profile can edit it.
+    permission delete = owner      // Only the owner can "delete" it (triggering soft delete in app).
+    permission manage_follows = owner // The owner can decide who this profile follows.
+}
+
+definition post {
+    // Corresponds to your `posts` table.
+
+    relation author: profile         // The profile that created this post.
+                                     // (e.g., post:post_xyz#author@profile:profile_alice)
+
+    relation liker: profile          // Profiles that have liked this post.
+                                     // From `post_likes`.
+                                     // (e.g., post:post_xyz#liker@profile:profile_bob)
+
+    permission edit = author          // Only the author of the post can edit it.
+    permission delete = author        // Only the author can delete it.
+
+    // Permission to create a comment on a post.
+    // We grant this if the profile can view the post.
+    permission create_comment = author->follower
+}
+
+definition comment {
+    // Corresponds to your `post_comments` table.
+
+    relation on_post: post           // The post this comment is associated with.
+                                     // (e.g., comment:comment_123#on_post@post:post_xyz)
+
+    relation author: profile         // The profile that wrote this comment.
+                                     // (e.g., comment:comment_123#author@profile:profile_alice)
+
+    permission edit = author          // Only the author of the comment can edit it.
+
+    // Permission to delete a comment.
+    // Granted to the comment's author or the author of the parent post.
+    // `on_post->author` means: get the `on_post` (a post), then get its `author` (a profile).
+    permission delete = author + on_post->author
+}

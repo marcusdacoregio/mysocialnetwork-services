@@ -1,0 +1,63 @@
+name: 'my-social-network'
+
+services:
+  postgres:
+    image: 'postgres:15.13-alpine3.20'
+    environment:
+      - 'POSTGRES_DB=mysocialnetwork'
+      - 'POSTGRES_PASSWORD=secret'
+      - 'POSTGRES_USER=postgres'
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d mysocialnetwork" ]
+      interval: 2s
+      timeout: 5s
+      retries: 5
+
+  spicedb-engine-migrate:
+    image: quay.io/authzed/spicedb:v1.43.0-debug
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: migrate head
+    environment:
+      SPICEDB_GRPC_PRESHARED_KEY: somerandomkey
+      SPICEDB_LOG_LEVEL: debug
+      SPICEDB_DATASTORE_ENGINE: postgres
+      SPICEDB_DATASTORE_CONN_URI: postgres://postgres:secret@postgres:5432/mysocialnetwork?sslmode=disable
+    restart: on-failure
+
+  spicedb-engine:
+    image: quay.io/authzed/spicedb:v1.43.0-debug
+    restart: always
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+      - "9090:9090"
+      - "50051:50051"
+    depends_on:
+      spicedb-engine-migrate:
+        condition: service_completed_successfully # Ensure migration finishes first
+      postgres:
+        condition: service_healthy
+    command: serve
+    environment:
+      SPICEDB_GRPC_PRESHARED_KEY: somerandomkey
+      SPICEDB_LOG_LEVEL: debug
+      SPICEDB_DATASTORE_ENGINE: postgres
+      SPICEDB_HTTP_ENABLED: true
+      SPICEDB_DATASTORE_CONN_URI: postgres://postgres:secret@postgres:5432/mysocialnetwork?sslmode=disable
+
+  spicedb-schema-loader:
+    image: quay.io/authzed/zed:v0.13.0 # Use zed CLI version compatible with SpiceDB v1.43.0
+    depends_on:
+      - spicedb-engine
+    volumes:
+      - ./config/spicedb/schema.zed:/schema/schema.zed # Mount your schema file
+    environment:
+      ZED_ENDPOINT: spicedb-engine:50051 # Target the gRPC port of your SpiceDB engine
+      ZED_TOKEN: somerandomkey # Use the same preshared key
+      SPICEDB_INSECURE: "true" # Since your SpiceDB gRPC is likely not using TLS by default
+    command: schema write /schema/schema.zed --insecure
+    restart: 'on-failure' # Or 'on-failure' with a limited retry count if desired
