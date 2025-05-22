@@ -23,7 +23,8 @@ class SecurityConfig {
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
 				.authorizeHttpRequests((authorize) -> authorize
-						.anyRequest().permitAll())
+						.requestMatchers("/api/v1/register").permitAll()
+						.anyRequest().authenticated())
 				.csrf(CsrfConfigurer::disable);
 		return http.build();
 	}
