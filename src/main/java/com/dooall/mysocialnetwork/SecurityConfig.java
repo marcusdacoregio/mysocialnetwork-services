@@ -25,7 +25,16 @@ class SecurityConfig {
 				.authorizeHttpRequests((authorize) -> authorize
 						.requestMatchers("/api/v1/register").permitAll()
 						.anyRequest().authenticated())
-				.csrf(CsrfConfigurer::disable);
+				.csrf(CsrfConfigurer::disable)
+				.formLogin((login) -> login
+						.loginProcessingUrl("/api/v1/login")
+						.successHandler((req, resp, auth) -> resp.setStatus(200))
+						.failureHandler((req, resp, e) -> resp.setStatus(401))
+				)
+				.exceptionHandling((exception) -> exception
+						.authenticationEntryPoint((req, resp, auth) -> resp.setStatus(401))
+						.accessDeniedHandler((req, resp, auth) -> resp.setStatus(403))
+				);
 		return http.build();
 	}
 

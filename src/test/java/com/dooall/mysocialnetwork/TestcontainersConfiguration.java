@@ -55,7 +55,8 @@ public class TestcontainersConfiguration {
 			.withNetworkAliases("spicedb-engine")
 			.withNetwork(network)
 			.dependsOn(postgres, spiceDbMigrate)
-			.withLogConsumer(new Slf4jLogConsumer(log).withPrefix("SPICEDB-ENGINE"));
+			.withLogConsumer(new Slf4jLogConsumer(log).withPrefix("SPICEDB-ENGINE"))
+			.waitingFor(Wait.forLogMessage(".*running server.*", 1));
 
 	static GenericContainer<?> spiceDbSchemaLoader = new GenericContainer<>(DockerImageName.parse("quay.io/authzed/zed:v0.13.0"))
 			.withFileSystemBind("./config/spicedb/schema.zed", "/schema/schema.zed", BindMode.READ_ONLY)
