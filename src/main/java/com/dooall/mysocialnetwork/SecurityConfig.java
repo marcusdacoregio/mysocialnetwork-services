@@ -28,7 +28,9 @@ class SecurityConfig {
 				.csrf(CsrfConfigurer::disable)
 				.formLogin((login) -> login
 						.loginProcessingUrl("/api/v1/login")
-						.successHandler((req, resp, auth) -> resp.setStatus(200))
+						.successHandler((req, resp, auth) -> {
+							resp.setStatus(200);
+						})
 						.failureHandler((req, resp, e) -> resp.setStatus(401))
 				)
 				.exceptionHandling((exception) -> exception

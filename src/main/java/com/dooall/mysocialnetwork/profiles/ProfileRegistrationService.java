@@ -1,13 +1,8 @@
 package com.dooall.mysocialnetwork.profiles;
 
-import com.authzed.api.v1.ObjectReference;
-import com.authzed.api.v1.PermissionService;
-import com.authzed.api.v1.PermissionsServiceGrpc;
-import com.authzed.api.v1.Relationship;
-import com.authzed.api.v1.RelationshipUpdate;
-import com.authzed.api.v1.SubjectReference;
-import com.authzed.api.v1.WriteRelationshipsRequest;
-import com.authzed.api.v1.WriteRelationshipsResponse;
+import com.dooall.mysocialnetwork.core.ObjectTypes;
+import com.dooall.mysocialnetwork.core.RelationshipStorage;
+import com.dooall.mysocialnetwork.core.UpdateRelationshipCommand;
 import com.dooall.mysocialnetwork.users.CreateUserResponse;
 import com.dooall.mysocialnetwork.users.UserService;
 import org.slf4j.Logger;
@@ -24,14 +19,14 @@ public class ProfileRegistrationService {
 	private final UserService userService;
 	private final ProfileRepository profileRepository;
 	private final JdbcAggregateTemplate jdbcAggregateTemplate;
-	private final PermissionsServiceGrpc.PermissionsServiceBlockingStub permissionsService;
+	private final RelationshipStorage relationshipStorage;
 
 	public ProfileRegistrationService(UserService userService,
-									  ProfileRepository profileRepository, JdbcAggregateTemplate jdbcAggregateTemplate, PermissionsServiceGrpc.PermissionsServiceBlockingStub permissionsService) {
+									  ProfileRepository profileRepository, JdbcAggregateTemplate jdbcAggregateTemplate, RelationshipStorage relationshipStorage) {
 		this.userService = userService;
 		this.profileRepository = profileRepository;
 		this.jdbcAggregateTemplate = jdbcAggregateTemplate;
-		this.permissionsService = permissionsService;
+		this.relationshipStorage = relationshipStorage;
 	}
 
 	@Transactional
@@ -72,30 +67,13 @@ public class ProfileRegistrationService {
 	}
 
 	private void setOwnerRelationship(Profile savedProfile, CreateUserResponse savedUser) {
-		WriteRelationshipsRequest profileRelationship = WriteRelationshipsRequest.newBuilder()
-				.addUpdates(
-						RelationshipUpdate.newBuilder()
-								.setOperation(RelationshipUpdate.Operation.OPERATION_CREATE)
-								.setRelationship(
-										Relationship.newBuilder()
-												.setResource(
-														ObjectReference.newBuilder()
-																.setObjectType("profile")
-																.setObjectId(savedProfile.getId().toString())
-																.build())
-												.setRelation("owner")
-												.setSubject(
-														SubjectReference.newBuilder()
-																.setObject(
-																		ObjectReference.newBuilder()
-																				.setObjectType("user")
-																				.setObjectId(savedUser.id().toString())
-																				.build())
-																.build())
-												.build())
-								.build())
+		UpdateRelationshipCommand command = UpdateRelationshipCommand.builder()
+				.resourceName(ObjectTypes.profile)
+				.resourceId(savedProfile.getId().toString())
+				.relation("owner")
+				.subjectName(ObjectTypes.user)
+				.subjectId(savedUser.id().toString())
 				.build();
-
-		WriteRelationshipsResponse writeRelationshipsResponse = this.permissionsService.writeRelationships(profileRelationship);
+		this.relationshipStorage.updateRelationship(command);
 	}
 }

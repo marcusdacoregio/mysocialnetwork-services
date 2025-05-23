@@ -40,7 +40,7 @@ class ProfileController {
      * @param request   The update request containing userId, displayName, and bio
      * @return The updated profile
      */
-    @PreAuthorize("@profileAuthz.isProfileOwner(#authenticatedUser.userId, #profileId)")
+    @PreAuthorize("@profileAuthz.canEdit(#authenticatedUser.userId, #profileId)")
     @PutMapping("/{profileId}")
     public ResponseEntity<?> updateProfile(@PathVariable UUID profileId, @Valid @RequestBody UpdateProfileRequest request,
                                            @CurrentUser AuthenticatedUser authenticatedUser) {
@@ -74,7 +74,7 @@ class ProfileController {
      * @param request   The update request containing userId and handle
      * @return The updated profile
      */
-    @PreAuthorize("@profileAuthz.isProfileOwner(#authenticatedUser.userId, #profileId)")
+    @PreAuthorize("@profileAuthz.canEdit(#authenticatedUser.userId, #profileId)")
     @PutMapping("/{profileId}/handle")
     public ResponseEntity<?> updateHandle(@PathVariable UUID profileId, @Valid @RequestBody UpdateHandleRequest request,
                                           @CurrentUser AuthenticatedUser authenticatedUser) {

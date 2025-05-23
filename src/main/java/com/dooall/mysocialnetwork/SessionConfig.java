@@ -13,6 +13,8 @@ import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.session.config.SessionRepositoryCustomizer;
 import org.springframework.session.jdbc.JdbcIndexedSessionRepository;
 import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHttpSession;
+import org.springframework.session.web.http.HeaderHttpSessionIdResolver;
+import org.springframework.session.web.http.HttpSessionIdResolver;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -92,5 +94,9 @@ class SessionConfig implements BeanClassLoaderAware {
 
 	}
 
+	@Bean
+	HttpSessionIdResolver httpSessionIdResolver() {
+		return new HeaderHttpSessionIdResolver("SESSION");
+	}
 
 }

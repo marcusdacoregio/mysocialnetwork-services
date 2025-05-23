@@ -10,3 +10,6 @@ spring:
 spicedb:
   host: localhost
   grpc-port: 50051
+
+logging.level:
+  org.springframework.security: TRACE

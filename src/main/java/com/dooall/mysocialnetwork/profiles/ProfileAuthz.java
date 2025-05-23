@@ -1,10 +1,8 @@
 package com.dooall.mysocialnetwork.profiles;
 
-import com.authzed.api.v1.CheckPermissionRequest;
-import com.authzed.api.v1.CheckPermissionResponse;
-import com.authzed.api.v1.ObjectReference;
-import com.authzed.api.v1.PermissionsServiceGrpc;
-import com.authzed.api.v1.SubjectReference;
+import com.dooall.mysocialnetwork.core.CheckPermissionCommand;
+import com.dooall.mysocialnetwork.core.ObjectTypes;
+import com.dooall.mysocialnetwork.core.RelationshipStorage;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -12,10 +10,10 @@ import java.util.UUID;
 @Component
 public class ProfileAuthz {
 
-	private final PermissionsServiceGrpc.PermissionsServiceBlockingStub permissionsService;
+	private final RelationshipStorage relationshipStorage;
 
-	ProfileAuthz(PermissionsServiceGrpc.PermissionsServiceBlockingStub permissionsService) {
-		this.permissionsService = permissionsService;
+	public ProfileAuthz(RelationshipStorage relationshipStorage) {
+		this.relationshipStorage = relationshipStorage;
 	}
 
 	/**
@@ -23,26 +21,15 @@ public class ProfileAuthz {
 	 * the profile
 	 * @return
 	 */
-	public boolean isProfileOwner(UUID userId, UUID profileId) {
-		CheckPermissionRequest request = CheckPermissionRequest.newBuilder()
-				.setResource(
-						ObjectReference.newBuilder()
-								.setObjectType("profile")
-								.setObjectId(profileId.toString())
-								.build())
-				.setSubject(
-						SubjectReference.newBuilder()
-								.setObject(
-										ObjectReference.newBuilder()
-												.setObjectType("user")
-												.setObjectId(userId.toString())
-												.build())
-								.build())
-				.setPermission("owner")
+	public boolean canEdit(UUID userId, UUID profileId) {
+		CheckPermissionCommand command = CheckPermissionCommand.builder()
+				.resourceName(ObjectTypes.profile)
+				.resourceId(profileId.toString())
+				.permission("edit")
+				.subjectName(ObjectTypes.user)
+				.subjectId(userId.toString())
 				.build();
-
-		CheckPermissionResponse response = this.permissionsService.checkPermission(request);
-		return response.getPermissionshipValue() == CheckPermissionResponse.Permissionship.PERMISSIONSHIP_HAS_PERMISSION_VALUE;
+		return this.relationshipStorage.checkRelationship(command);
 	}
 
 }
