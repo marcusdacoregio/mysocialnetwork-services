@@ -26,19 +26,9 @@ class ProfileRegistrationController {
 	}
 
 	@PostMapping
-	public ResponseEntity<?> registerProfile(@Valid @RequestBody ProfileRegistrationRequest request) {
+	public ResponseEntity<ProfileRegistrationResponse> registerProfile(@Valid @RequestBody ProfileRegistrationRequest request) {
 		log.info("Received registration request for handle: {}", request.handle());
-		try {
-			ProfileRegistrationResponse response = this.registrationService.registerNewProfile(request);
-			return ResponseEntity.status(HttpStatus.CREATED).body(response);
-		} catch (IllegalArgumentException e) {
-			log.warn("Registration failed due to bad request: {}", e.getMessage());
-			// Consider a structured error response DTO for production
-			return ResponseEntity.badRequest().body(e.getMessage());
-		} catch (Exception e) {
-			log.error("An unexpected error occurred during registration for handle {}: {}", request.handle(), e.getMessage(), e);
-			// Consider a structured error response DTO for production
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred during registration.");
-		}
+		ProfileRegistrationResponse response = this.registrationService.registerNewProfile(request);
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 }

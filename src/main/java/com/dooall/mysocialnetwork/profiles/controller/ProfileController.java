@@ -42,27 +42,16 @@ class ProfileController {
      */
     @PreAuthorize("@profileAuthz.canEdit(#authenticatedUser.userId, #profileId)")
     @PutMapping("/{profileId}")
-    public ResponseEntity<?> updateProfile(@PathVariable UUID profileId, @Valid @RequestBody UpdateProfileRequest request,
+    public ResponseEntity<ProfileResponse> updateProfile(@PathVariable UUID profileId, @Valid @RequestBody UpdateProfileRequest request,
                                            @CurrentUser AuthenticatedUser authenticatedUser) {
         log.info("Received request to update profile {} from user {}", profileId, authenticatedUser.getUserId());
-        try {
-            Profile updatedProfile = this.profileService.updateProfile(
-                    profileId,
-                    authenticatedUser.getUserId(),
-                    request.displayName(),
-                    request.bio()
-            );
-            return ResponseEntity.ok(ProfileResponse.fromProfile(updatedProfile));
-        } catch (IllegalArgumentException e) {
-            log.warn("Profile update failed due to bad request: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (SecurityException e) {
-            log.warn("Profile update failed due to authorization: {}", e.getMessage());
-            return ResponseEntity.status(403).body(e.getMessage());
-        } catch (Exception e) {
-            log.error("An unexpected error occurred during profile update: {}", e.getMessage(), e);
-            return ResponseEntity.status(500).body("An unexpected error occurred during profile update.");
-        }
+        Profile updatedProfile = this.profileService.updateProfile(
+                profileId,
+                authenticatedUser.getUserId(),
+                request.displayName(),
+                request.bio()
+        );
+        return ResponseEntity.ok(ProfileResponse.fromProfile(updatedProfile));
     }
 
     /**
@@ -76,25 +65,14 @@ class ProfileController {
      */
     @PreAuthorize("@profileAuthz.canEdit(#authenticatedUser.userId, #profileId)")
     @PutMapping("/{profileId}/handle")
-    public ResponseEntity<?> updateHandle(@PathVariable UUID profileId, @Valid @RequestBody UpdateHandleRequest request,
+    public ResponseEntity<ProfileResponse> updateHandle(@PathVariable UUID profileId, @Valid @RequestBody UpdateHandleRequest request,
                                           @CurrentUser AuthenticatedUser authenticatedUser) {
         log.info("Received request to update handle for profile {} to {} from user {}", profileId, request.handle(), authenticatedUser.getUserId());
-        try {
-            Profile updatedProfile = this.profileService.updateHandle(
-                    profileId,
-                    authenticatedUser.getUserId(),
-                    request.handle()
-            );
-            return ResponseEntity.ok(ProfileResponse.fromProfile(updatedProfile));
-        } catch (IllegalArgumentException e) {
-            log.warn("Handle update failed due to bad request: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (SecurityException e) {
-            log.warn("Handle update failed due to authorization: {}", e.getMessage());
-            return ResponseEntity.status(403).body(e.getMessage());
-        } catch (Exception e) {
-            log.error("An unexpected error occurred during handle update: {}", e.getMessage(), e);
-            return ResponseEntity.status(500).body("An unexpected error occurred during handle update.");
-        }
+        Profile updatedProfile = this.profileService.updateHandle(
+                profileId,
+                authenticatedUser.getUserId(),
+                request.handle()
+        );
+        return ResponseEntity.ok(ProfileResponse.fromProfile(updatedProfile));
     }
 }
