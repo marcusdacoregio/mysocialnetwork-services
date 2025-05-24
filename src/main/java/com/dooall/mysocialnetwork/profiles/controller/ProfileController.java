@@ -2,7 +2,6 @@ package com.dooall.mysocialnetwork.profiles.controller;
 
 import com.dooall.mysocialnetwork.core.AuthenticatedUser;
 import com.dooall.mysocialnetwork.core.CurrentUser;
-import com.dooall.mysocialnetwork.profiles.Profile;
 import com.dooall.mysocialnetwork.profiles.ProfileResponse;
 import com.dooall.mysocialnetwork.profiles.ProfileService;
 import com.dooall.mysocialnetwork.profiles.UpdateHandleRequest;
@@ -46,13 +45,13 @@ class ProfileController {
     public ResponseEntity<ProfileResponse> updateProfile(@PathVariable UUID profileId, @Valid @RequestBody UpdateProfileRequest request,
                                            @CurrentUser AuthenticatedUser authenticatedUser) {
         log.info("Received request to update profile {} from user {}", profileId, authenticatedUser.getUserId());
-        Profile updatedProfile = this.profileService.updateProfile(
+        ProfileResponse updatedProfile = this.profileService.updateProfile(
                 profileId,
                 authenticatedUser.getUserId(),
                 request.displayName(),
                 request.bio()
         );
-        return ResponseEntity.ok(ProfileResponse.fromProfile(updatedProfile));
+        return ResponseEntity.ok(updatedProfile);
     }
 
     /**
@@ -69,12 +68,12 @@ class ProfileController {
     public ResponseEntity<ProfileResponse> updateHandle(@PathVariable UUID profileId, @Valid @RequestBody UpdateHandleRequest request,
                                           @CurrentUser AuthenticatedUser authenticatedUser) {
         log.info("Received request to update handle for profile {} to {} from user {}", profileId, request.handle(), authenticatedUser.getUserId());
-        Profile updatedProfile = this.profileService.updateHandle(
+        ProfileResponse updatedProfile = this.profileService.updateHandle(
                 profileId,
                 authenticatedUser.getUserId(),
                 request.handle()
         );
-        return ResponseEntity.ok(ProfileResponse.fromProfile(updatedProfile));
+        return ResponseEntity.ok(updatedProfile);
     }
 
     /**
@@ -85,8 +84,7 @@ class ProfileController {
      */
     @GetMapping("/me")
     public ResponseEntity<ProfileResponse> getCurrentUserProfile(@CurrentUser AuthenticatedUser authenticatedUser) {
-        log.info("Received request to get profile for current user {}", authenticatedUser.getUserId());
-        Profile profile = this.profileService.getProfileByUserId(authenticatedUser.getUserId());
-        return ResponseEntity.ok(ProfileResponse.fromProfile(profile));
+        ProfileResponse profile = this.profileService.getProfile(authenticatedUser.getProfileId());
+        return ResponseEntity.ok(profile);
     }
 }

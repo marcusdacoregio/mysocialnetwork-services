@@ -17,7 +17,7 @@ public record ProfileResponse(
     /**
      * Creates a ProfileResponse from a Profile entity.
      */
-    public static ProfileResponse fromProfile(Profile profile) {
+    static ProfileResponse fromProfile(Profile profile) {
         return new ProfileResponse(
                 profile.getId(),
                 profile.getUserId(),
