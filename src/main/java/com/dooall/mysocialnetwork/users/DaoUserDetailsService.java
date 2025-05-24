@@ -1,6 +1,8 @@
 package com.dooall.mysocialnetwork.users;
 
 import com.dooall.mysocialnetwork.core.AuthenticatedUser;
+import com.dooall.mysocialnetwork.profiles.Profile;
+import com.dooall.mysocialnetwork.profiles.ProfileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,9 +18,11 @@ class DaoUserDetailsService implements UserDetailsService {
 	private static final Logger log = LoggerFactory.getLogger(DaoUserDetailsService.class);
 
 	private final UserRepository userRepository;
+	private final ProfileService profileService;
 
-	DaoUserDetailsService(UserRepository userRepository) {
+	DaoUserDetailsService(UserRepository userRepository, ProfileService profileService) {
 		this.userRepository = userRepository;
+		this.profileService = profileService;
 	}
 
 	@Override
@@ -29,8 +33,10 @@ class DaoUserDetailsService implements UserDetailsService {
 			throw new UsernameNotFoundException("Invalid username or password");
 		}
 		User user = maybeUser.get();
+		Profile profile = this.profileService.getProfileByUserId(user.getId());
 		AuthenticatedUser authenticatedUser = new AuthenticatedUser(user.getEmail(), user.getPasswordHash());
 		authenticatedUser.setUserId(user.getId());
+		authenticatedUser.setProfileId(profile.getId());
 		return authenticatedUser;
 	}
 

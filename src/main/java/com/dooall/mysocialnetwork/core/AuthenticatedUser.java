@@ -15,6 +15,7 @@ public class AuthenticatedUser implements UserDetails {
 	private final String password;
 
 	private UUID userId;
+	private UUID profileId;
 
 	public AuthenticatedUser(String email, String password) {
 		Assert.hasText(email, "email cannot be empty");
@@ -45,4 +46,13 @@ public class AuthenticatedUser implements UserDetails {
 	public void setUserId(UUID userId) {
 		this.userId = userId;
 	}
+
+	public UUID getProfileId() {
+		return this.profileId;
+	}
+
+	public void setProfileId(UUID profileId) {
+		this.profileId = profileId;
+	}
+
 }
