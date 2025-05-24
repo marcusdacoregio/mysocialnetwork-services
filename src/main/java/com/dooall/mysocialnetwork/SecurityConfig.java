@@ -33,6 +33,9 @@ class SecurityConfig {
 						})
 						.failureHandler((req, resp, e) -> resp.setStatus(401))
 				)
+				.logout((logout) -> logout
+						.logoutUrl("/api/v1/logout")
+						.logoutSuccessHandler((req, res, authentication) -> res.setStatus(200)))
 				.exceptionHandling((exception) -> exception
 						.authenticationEntryPoint((req, resp, auth) -> resp.setStatus(401))
 						.accessDeniedHandler((req, resp, auth) -> resp.setStatus(403))
