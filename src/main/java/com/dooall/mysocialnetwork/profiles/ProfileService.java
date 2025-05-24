@@ -81,6 +81,24 @@ public class ProfileService {
         return updatedProfile;
     }
 
+    /**
+     * Gets a profile by user ID.
+     *
+     * @param userId The ID of the user
+     * @return The profile
+     * @throws IllegalArgumentException If the profile doesn't exist
+     */
+    public Profile getProfileByUserId(UUID userId) {
+        log.info("Attempting to get profile for user {}", userId);
+        Optional<Profile> profileOpt = this.profileRepository.findByUserId(userId);
+        if (profileOpt.isEmpty()) {
+            log.warn("Get profile failed: Profile for user {} not found", userId);
+            throw new IllegalArgumentException("Profile not found.");
+        }
+
+        return profileOpt.get();
+    }
+
     private Profile getProfile(UUID profileId) {
         Optional<Profile> profileOpt = this.profileRepository.findById(profileId);
         if (profileOpt.isEmpty()) {

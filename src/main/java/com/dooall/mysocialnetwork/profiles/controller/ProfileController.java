@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -74,5 +75,18 @@ class ProfileController {
                 request.handle()
         );
         return ResponseEntity.ok(ProfileResponse.fromProfile(updatedProfile));
+    }
+
+    /**
+     * Gets the profile of the currently authenticated user.
+     *
+     * @param authenticatedUser The authenticated user
+     * @return The user's profile
+     */
+    @GetMapping("/me")
+    public ResponseEntity<ProfileResponse> getCurrentUserProfile(@CurrentUser AuthenticatedUser authenticatedUser) {
+        log.info("Received request to get profile for current user {}", authenticatedUser.getUserId());
+        Profile profile = this.profileService.getProfileByUserId(authenticatedUser.getUserId());
+        return ResponseEntity.ok(ProfileResponse.fromProfile(profile));
     }
 }

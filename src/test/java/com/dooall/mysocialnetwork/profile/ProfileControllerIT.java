@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.securityContext;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -213,5 +214,31 @@ class ProfileControllerIT {
         Profile updatedProfile = updatedProfileOpt.get();
         assertThat(updatedProfile.getDisplayName()).isEqualTo("Test User");
         assertThat(updatedProfile.getBio()).isNull();
+    }
+
+    @Test
+    @DisplayName("Should return the current user's profile")
+    void shouldReturnCurrentUserProfile() throws Exception {
+        // Act & Assert
+        MvcResult mvcResult = this.mockMvc.perform(get("/api/v1/profiles/me")
+                        .with(securityContext(TestSecurityContexts.create(this.testUserId))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(this.testProfileId.toString()))
+                .andExpect(jsonPath("$.userId").value(this.testUserId.toString()))
+                .andReturn();
+
+        // Assert - Response DTO
+        String responseBody = mvcResult.getResponse().getContentAsString();
+        ProfileResponse responseDto = this.objectMapper.readValue(responseBody, ProfileResponse.class);
+
+        assertThat(responseDto.id()).isEqualTo(this.testProfileId);
+        assertThat(responseDto.userId()).isEqualTo(this.testUserId);
+
+        // Assert - Database state
+        Optional<Profile> profileOpt = this.profileRepository.findById(this.testProfileId);
+        assertThat(profileOpt).isPresent();
+        Profile profile = profileOpt.get();
+        assertThat(profile.getId()).isEqualTo(this.testProfileId);
+        assertThat(profile.getUserId()).isEqualTo(this.testUserId);
     }
 }
