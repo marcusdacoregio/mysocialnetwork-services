@@ -40,7 +40,7 @@ dependencies {
 
     developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 
-    runtimeOnly 'io.micrometer:micrometer-registry-otlp'
+//    runtimeOnly 'io.micrometer:micrometer-registry-otlp'
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'org.springframework.modulith:spring-modulith-actuator'
     runtimeOnly 'org.springframework.modulith:spring-modulith-observability'

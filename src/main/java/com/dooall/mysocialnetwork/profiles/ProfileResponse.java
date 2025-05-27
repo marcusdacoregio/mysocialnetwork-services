@@ -11,8 +11,7 @@ public record ProfileResponse(
         UUID userId,
         String displayName,
         String handle,
-        String bio,
-        OffsetDateTime createdAt
+        String bio
 ) {
     /**
      * Creates a ProfileResponse from a Profile entity.
@@ -23,8 +22,7 @@ public record ProfileResponse(
                 profile.getUserId(),
                 profile.getDisplayName(),
                 profile.getHandle(),
-                profile.getBio(),
-                profile.getCreatedAt()
+                profile.getBio()
         );
     }
 }

@@ -1,6 +1,11 @@
 package com.dooall.mysocialnetwork;
 
+import com.dooall.mysocialnetwork.core.AuthenticatedUser;
+import com.dooall.mysocialnetwork.core.AuthenticatedUserMixin;
+import com.dooall.mysocialnetwork.core.ImmutableCollectionsMixin;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +28,8 @@ import java.io.OutputStream;
 @Configuration(proxyBeanMethods = false)
 @EnableJdbcHttpSession
 class SessionConfig implements BeanClassLoaderAware {
+
+	private static final Logger logger = LoggerFactory.getLogger(SessionConfig.class);
 
 	private ClassLoader classLoader;
 
@@ -51,6 +58,16 @@ class SessionConfig implements BeanClassLoaderAware {
 		ObjectMapper copy = objectMapper.copy();
 		// Register Spring Security Jackson Modules
 		copy.registerModules(SecurityJackson2Modules.getModules(this.classLoader));
+		// Register custom mixins for our classes
+		copy.addMixIn(AuthenticatedUser.class, AuthenticatedUserMixin.class);
+		// Register mixin for ImmutableCollections$Set12
+		try {
+			Class<?> immutableSet12Class = Class.forName("java.util.ImmutableCollections$Set12");
+			copy.addMixIn(immutableSet12Class, ImmutableCollectionsMixin.class);
+		} catch (ClassNotFoundException ex) {
+			logger.warn("Could not find ImmutableCollections$Set12 class, skipping mixin registration", ex);
+			// Ignore if the class is not found (different Java version)
+		}
 		// Activate default typing explicitly if not using Spring Security
 		// copy.activateDefaultTyping(copy.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
 		GenericConversionService converter = new GenericConversionService();

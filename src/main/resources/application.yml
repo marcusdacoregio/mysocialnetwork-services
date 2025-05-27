@@ -1,4 +1,8 @@
 spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mysocialnetwork
+    username: postgres
+    password: secret
   application:
     name: my-social-network
   mvc:
@@ -6,6 +10,10 @@ spring:
       enabled: true
   flyway:
     baseline-on-migrate: true
+  docker:
+    compose:
+      lifecycle-management: start_only
+      enabled: false
 
 spicedb:
   host: localhost

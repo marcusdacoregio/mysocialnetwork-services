@@ -6,13 +6,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class AuthenticatedUser implements UserDetails {
 
 	private final String email;
 	private final String password;
+	private final Set<SimpleGrantedAuthority> authorities;
 
 	private UUID userId;
 	private UUID profileId;
@@ -22,11 +23,12 @@ public class AuthenticatedUser implements UserDetails {
 		Assert.hasText(password, "password cannot be empty");
 		this.email = email;
 		this.password = password;
+		this.authorities = Set.of(new SimpleGrantedAuthority("ROLE_USER"));
 	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+		return this.authorities;
 	}
 
 	@Override

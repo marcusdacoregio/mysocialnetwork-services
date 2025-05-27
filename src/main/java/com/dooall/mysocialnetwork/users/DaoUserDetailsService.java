@@ -1,7 +1,7 @@
 package com.dooall.mysocialnetwork.users;
 
 import com.dooall.mysocialnetwork.core.AuthenticatedUser;
-import com.dooall.mysocialnetwork.profiles.Profile;
+import com.dooall.mysocialnetwork.profiles.ProfileResponse;
 import com.dooall.mysocialnetwork.profiles.ProfileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +33,10 @@ class DaoUserDetailsService implements UserDetailsService {
 			throw new UsernameNotFoundException("Invalid username or password");
 		}
 		User user = maybeUser.get();
-		Profile profile = this.profileService.getProfileByUserId(user.getId());
+		ProfileResponse profile = this.profileService.getProfileByUserId(user.getId());
 		AuthenticatedUser authenticatedUser = new AuthenticatedUser(user.getEmail(), user.getPasswordHash());
 		authenticatedUser.setUserId(user.getId());
-		authenticatedUser.setProfileId(profile.getId());
+		authenticatedUser.setProfileId(profile.id());
 		return authenticatedUser;
 	}
 
